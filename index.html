@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="./favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="2026" />
+    <link rel="manifest" href="./site.webmanifest" />
+    <title>Time · Money</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #ffffff;
+            color: #000000;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            position: relative;
+            border: 1px solid #000000;
+            background: #ffffff;
+        }
+
+        /* Закрепление углов */
+        .corner {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-style: solid;
+            border-color: #000000;
+        }
+
+        .corner-tl {
+            top: 30px;
+            left: 30px;
+            border-width: 3px 0 0 3px;
+        }
+
+        .corner-tr {
+            top: 30px;
+            right: 30px;
+            border-width: 3px 3px 0 0;
+        }
+
+        .corner-bl {
+            bottom: 30px;
+            left: 30px;
+            border-width: 0 0 3px 3px;
+        }
+
+        .corner-br {
+            bottom: 30px;
+            right: 30px;
+            border-width: 0 3px 3px 0;
+        }
+
+        .content {
+            padding: 70px 35px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* Время */
+        .time-section {
+            margin-bottom: 60px;
+            width: 100%;
+        }
+
+        .time-label {
+            font-size: 14px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            color: #666666;
+        }
+
+        .time-display {
+            font-size: 6rem;
+            font-weight: 500;
+            line-height: 1;
+            letter-spacing: -3px;
+            font-family: 'Inter', monospace;
+            margin-bottom: 15px;
+        }
+
+        .date-display {
+            font-size: 18px;
+            letter-spacing: 1px;
+            text-transform: lowercase;
+            color: #666666;
+        }
+
+        /* Деньги — две главные суммы */
+        .money-row {
+            display: flex;
+            justify-content: center;
+            gap: 150px;
+            margin-bottom: 60px;
+            border-top: 1px solid #000000;
+            border-bottom: 1px solid #000000;
+            padding: 35px 0;
+            width: 100%;
+        }
+
+        .money-item {
+            text-align: center;
+        }
+
+        .money-item-label {
+            font-size: 13px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            color: #666666;
+        }
+
+        .money-item-amount {
+            font-size: 2.5rem;
+            font-weight: 600;
+            letter-spacing: -1px;
+        }
+
+        .money-item-amount small {
+            font-size: 1rem;
+            font-weight: 300;
+            color: #666666;
+            margin-left: 5px;
+        }
+
+        /* Статистика */
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 80px;
+            margin-bottom: 70px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 100%;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: center;
+        }
+
+        .stat-label {
+            color: #666666;
+            font-size: 12px;
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 500;
+        }
+
+        /* Диаграммы */
+        .charts-row {
+            display: flex;
+            justify-content: center;
+            gap: 100px;
+            margin-bottom: 70px;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .chart-container {
+            text-align: center;
+        }
+
+        .chart {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            position: relative;
+            background: transparent;
+        }
+
+        .chart-progress {
+            position: absolute;
+            width: calc(100%);
+            height: calc(100%);
+            border-radius: 50%;
+            border: 2px solid #000000;
+            clip: rect(0px, 150px, 150px, 0px);
+            transform: rotate(0deg);
+        }
+
+        .chart-label {
+            font-size: 14px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #666666;
+            margin-bottom: 8px;
+        }
+
+        .chart-percent {
+            font-size: 2.2rem;
+            font-weight: 500;
+            line-height: 1.2;
+        }
+
+        /* Итого с начала года */
+        .total-year {
+            text-align: center;
+            border-top: 2px solid #000000;
+            padding-top: 35px;
+            width: 100%;
+        }
+
+        .total-year-label {
+            font-size: 12px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #666666;
+            margin-bottom: 12px;
+        }
+
+        .total-year-amount {
+            font-size: 4rem;
+            font-weight: 600;
+            letter-spacing: -2px;
+            line-height: 1;
+        }
+
+        .total-year-amount small {
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: #666666;
+            margin-left: 10px;
+        }
+
+        /* Подвал */
+        .footer {
+            margin-top: 40px;
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #999999;
+            width: 100%;
+        }
+
+        @media (max-width: 900px) {
+            .money-row {
+                gap: 60px;
+                flex-wrap: wrap;
+            }
+            
+            .stats-row {
+                gap: 40px;
+                flex-wrap: wrap;
+            }
+            
+            .time-display {
+                font-size: 4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Угловые закрепы -->
+        <div class="corner corner-tl"></div>
+        <div class="corner corner-tr"></div>
+        <div class="corner corner-bl"></div>
+        <div class="corner corner-br"></div>
+
+        <div class="content">
+            <!-- Время -->
+            <div class="time-section">
+                <div class="time-label">текущее время</div>
+                <div class="time-display" id="currentTime">10:47:38</div>
+                <div class="date-display" id="currentDate">пятница, 20 февраля 2026</div>
+            </div>
+
+            <!-- Сегодня / За месяц -->
+            <div class="money-row">
+                <div class="money-item">
+                    <div class="money-item-label">сегодня</div>
+                    <div class="money-item-amount" id="todayEarned">0 <small>₽</small></div>
+                </div>
+                <div class="money-item">
+                    <div class="money-item-label">за месяц</div>
+                    <div class="money-item-amount" id="monthEarned">0 <small>₽</small></div>
+                </div>
+            </div>
+
+            <!-- Статистика: Зарплата / Раб.дней / Ставка/день -->
+            <div class="stats-row">
+                <div class="stat-item">
+                    <span class="stat-label">ставка/день</span>
+                    <span class="stat-value" id="dayRate">14 211 ₽</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">зарплата</span>
+                    <span class="stat-value" id="monthlySalary">270 000 ₽</span>
+                </div>
+            </div>
+
+            <!-- Круговые диаграммы -->
+            <div class="charts-row">
+                <div class="chart-container">
+                    <div class="chart" id="dayChart">
+                        <svg width="140" height="140" viewBox="0 0 140 140" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg);">
+                            <circle cx="70" cy="70" r="65" fill="none" stroke="#000000" stroke-width="2" stroke-dasharray="408.4" stroke-dashoffset="408.4" id="dayCircle"/>
+                        </svg>
+                    </div>
+                    <div class="chart-label">День</div>
+                    <div class="chart-percent" id="dayPercent">0%</div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart" id="monthChart">
+                        <svg width="140" height="140" viewBox="0 0 140 140" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg);">
+                            <circle cx="70" cy="70" r="65" fill="none" stroke="#000000" stroke-width="2" stroke-dasharray="408.4" stroke-dashoffset="408.4" id="monthCircle"/>
+                        </svg>
+                    </div>
+                    <div class="chart-label">Месяц</div>
+                    <div class="chart-percent" id="monthPercent">0%</div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart" id="yearChart">
+                        <svg width="140" height="140" viewBox="0 0 140 140" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg);">
+                            <circle cx="70" cy="70" r="65" fill="none" stroke="#000000" stroke-width="2" stroke-dasharray="408.4" stroke-dashoffset="408.4" id="yearCircle"/>
+                        </svg>
+                    </div>
+                    <div class="chart-label">Год</div>
+                    <div class="chart-percent" id="yearPercent">0%</div>
+                </div>
+            </div>
+
+            <!-- Заработано с 1 января -->
+            <div class="total-year">
+                <div class="total-year-label">заработано 2026</div>
+                <div class="total-year-amount" id="yearEarned">0 <small>₽</small></div>
+            </div>
+
+            <!-- Подвал -->
+            <div class="footer">
+                <span id="workStatus">рабочий день</span> · обновление каждую секунду
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Константы
+        const MONTHLY_SALARY = 270000;
+        const WORKING_DAYS_PER_MONTH = 19;
+        const WORK_START = 9;
+        const WORK_END = 18;
+        const WORK_HOURS = WORK_END - WORK_START;
+        
+        const DAY_RATE = MONTHLY_SALARY / WORKING_DAYS_PER_MONTH;
+        const WORK_SECONDS_PER_DAY = WORK_HOURS * 3600;
+        const SECOND_RATE = DAY_RATE / WORK_SECONDS_PER_DAY;
+
+        // Длина окружности для круга радиусом 65: 2 * π * 65 ≈ 408.4
+        const CIRCLE_LENGTH = 2 * Math.PI * 65;
+
+        function formatMoney(amount) {
+            return Math.round(amount).toLocaleString('ru-RU');
+        }
+
+        function formatDate(date) {
+            const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+                          'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+            const days = ['воскресенье', 'понедельник', 'вторник', 'среда', 
+                         'четверг', 'пятница', 'суббота'];
+            
+            return `${days[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+        }
+
+        function isWeekend(date) {
+            return date.getDay() === 0 || date.getDay() === 6;
+        }
+
+        function calculateDayEarned(date) {
+            const workStart = new Date(date);
+            workStart.setHours(WORK_START, 0, 0, 0);
+            
+            const workEnd = new Date(date);
+            workEnd.setHours(WORK_END, 0, 0, 0);
+            
+            if (isWeekend(date)) {
+                return 0;
+            } else if (date < workStart) {
+                return 0;
+            } else if (date > workEnd) {
+                return DAY_RATE;
+            } else {
+                const secondsWorked = Math.floor((date - workStart) / 1000);
+                return Math.min(secondsWorked * SECOND_RATE, DAY_RATE);
+            }
+        }
+
+        function calculateDayProgress() {
+            const now = new Date();
+            
+            if (isWeekend(now)) {
+                return 0;
+            }
+            
+            const workStart = new Date(now);
+            workStart.setHours(WORK_START, 0, 0, 0);
+            
+            const workEnd = new Date(now);
+            workEnd.setHours(WORK_END, 0, 0, 0);
+            
+            if (now < workStart) {
+                return 0;
+            } else if (now > workEnd) {
+                return 100;
+            } else {
+                const secondsWorked = Math.floor((now - workStart) / 1000);
+                return (secondsWorked / WORK_SECONDS_PER_DAY) * 100;
+            }
+        }
+
+        function calculateMonthProgress() {
+            const now = new Date();
+            const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            return (now.getDate() / daysInMonth) * 100;
+        }
+
+        function calculateYearProgress() {
+            const now = new Date();
+            const startOfYear = new Date(now.getFullYear(), 0, 1);
+            const endOfYear = new Date(now.getFullYear(), 11, 31);
+            const totalYearMs = endOfYear - startOfYear;
+            const passedMs = now - startOfYear;
+            return (passedMs / totalYearMs) * 100;
+        }
+
+        function calculateMonthEarned() {
+            const now = new Date();
+            
+            let total = 0;
+            const currentDay = now.getDate();
+            
+            for (let day = 1; day <= currentDay; day++) {
+                const checkDate = new Date(now.getFullYear(), now.getMonth(), day, 23, 59, 59);
+                
+                if (checkDate > now) {
+                    total += calculateDayEarned(now);
+                } else {
+                    if (!isWeekend(checkDate)) {
+                        total += DAY_RATE;
+                    }
+                }
+            }
+            
+            return total;
+        }
+
+        function calculateYearEarned() {
+            const now = new Date();
+            
+            let total = 0;
+            
+            for (let month = 0; month < now.getMonth(); month++) {
+                const daysInMonth = new Date(now.getFullYear(), month + 1, 0).getDate();
+                
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const checkDate = new Date(now.getFullYear(), month, day);
+                    if (!isWeekend(checkDate)) {
+                        total += DAY_RATE;
+                    }
+                }
+            }
+            
+            total += calculateMonthEarned();
+            
+            return total;
+        }
+
+        function calculateToday() {
+            const now = new Date();
+            const workStart = new Date(now);
+            workStart.setHours(WORK_START, 0, 0, 0);
+            
+            if (isWeekend(now)) {
+                return { earned: 0, status: 'выходной' };
+            } else if (now < workStart) {
+                return { earned: 0, status: 'до начала' };
+            } else {
+                const earned = calculateDayEarned(now);
+                return { 
+                    earned: earned,
+                    status: earned >= DAY_RATE ? 'день завершён' : 'рабочий день'
+                };
+            }
+        }
+
+        function updateDisplay() {
+            const now = new Date();
+            const today = calculateToday();
+            const monthEarned = calculateMonthEarned();
+            const yearEarned = calculateYearEarned();
+            
+            const dayProgress = calculateDayProgress();
+            const monthProgress = calculateMonthProgress();
+            const yearProgress = calculateYearProgress();
+            
+            // Время
+            document.getElementById('currentTime').textContent = 
+                now.toLocaleTimeString('ru-RU', { hour12: false });
+            document.getElementById('currentDate').textContent = formatDate(now);
+            
+            // Деньги
+            document.getElementById('todayEarned').textContent = 
+                formatMoney(today.earned);
+            document.getElementById('monthEarned').textContent = 
+                formatMoney(monthEarned);
+            document.getElementById('yearEarned').textContent = 
+                formatMoney(yearEarned);
+            
+            // Статистика
+            document.getElementById('monthlySalary').textContent = 
+                MONTHLY_SALARY.toLocaleString('ru-RU') + ' ₽';
+            document.getElementById('dayRate').textContent = 
+                formatMoney(DAY_RATE) + ' ₽';
+            
+            // Круговые диаграммы (линия по окружности)
+            const dayOffset = CIRCLE_LENGTH - (dayProgress / 100) * CIRCLE_LENGTH;
+            document.getElementById('dayCircle').style.strokeDashoffset = dayOffset;
+            document.getElementById('dayPercent').textContent = Math.round(dayProgress) + '%';
+            
+            const monthOffset = CIRCLE_LENGTH - (monthProgress / 100) * CIRCLE_LENGTH;
+            document.getElementById('monthCircle').style.strokeDashoffset = monthOffset;
+            document.getElementById('monthPercent').textContent = Math.round(monthProgress) + '%';
+            
+            const yearOffset = CIRCLE_LENGTH - (yearProgress / 100) * CIRCLE_LENGTH;
+            document.getElementById('yearCircle').style.strokeDashoffset = yearOffset;
+            document.getElementById('yearPercent').textContent = Math.round(yearProgress) + '%';
+            
+            // Статус
+            document.getElementById('workStatus').textContent = today.status;
+        }
+
+        // Обновляем каждую секунду
+        updateDisplay();
+        setInterval(updateDisplay, 1000);
+    </script>
+</body>
+</html>
