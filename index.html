@@ -170,7 +170,7 @@
         }
 
         .stat-value {
-            font-size: 3rem;
+            font-size: 2rem;
             font-weight: 500;
         }
 
@@ -309,6 +309,18 @@
             <!-- Статистика: Зарплата / Раб.дней / Ставка/день -->
             <div class="stats-row">
                 <div class="stat-item">
+                    <span class="stat-label">ставка/секунда</span>
+                    <span class="stat-value" id="secRate">14 211 ₽</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">ставка/минута</span>
+                    <span class="stat-value" id="minRate">14 211 ₽</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">ставка/час</span>
+                    <span class="stat-value" id="hourRate">14 211 ₽</span>
+                </div>
+                <div class="stat-item">
                     <span class="stat-label">ставка/день</span>
                     <span class="stat-value" id="dayRate">14 211 ₽</span>
                 </div>
@@ -363,130 +375,205 @@
     </div>
 
     <script>
-        // Константы
-        const MONTHLY_SALARY = 270000; // 270 000 рублей в месяц
-        const SECONDS_IN_DAY = 24 * 60 * 60; // 24 часа * 60 минут * 60 секунд
-        const SECONDS_IN_MONTH = 30 * SECONDS_IN_DAY; // 30 дней
-        const SECONDS_IN_YEAR = 365 * SECONDS_IN_DAY; // 365 дней
-        
-        // Стоимость одной секунды
-        const SECOND_RATE = MONTHLY_SALARY / SECONDS_IN_MONTH;
+    // Константы
+    const MONTHLY_SALARY = 270000; // 270 000 рублей в месяц
 
-        // Длина окружности для круга радиусом 65: 2 * π * 65 ≈ 408.4
-        const CIRCLE_LENGTH = 2 * Math.PI * 65;
+    // Функция для получения количества секунд в текущем месяце
+    function getSecondsInCurrentMonth() {
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        return Math.floor((startOfNextMonth - startOfMonth) / 1000);
+    }
 
-        function formatMoney(amount) {
-            return Math.floor(amount).toLocaleString('ru-RU');
-        }
+    // Функция для получения количества секунд в текущем году
+    function getSecondsInCurrentYear() {
+        const now = new Date();
+        const startOfYear = new Date(now.getFullYear(), 0, 1);
+        const startOfNextYear = new Date(now.getFullYear() + 1, 0, 1);
+        return Math.floor((startOfNextYear - startOfYear) / 1000);
+    }
 
-        function formatDate(date) {
-            const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+    // Функция для получения количества дней в текущем месяце
+    function getDaysInCurrentMonth() {
+        const now = new Date();
+        return new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    }
+
+    // Расчет ставок
+    const SECONDS_IN_CURRENT_MONTH = getSecondsInCurrentMonth();
+    const MINUTES_IN_CURRENT_MONTH = SECONDS_IN_CURRENT_MONTH / 60;
+    const HOURS_IN_CURRENT_MONTH = MINUTES_IN_CURRENT_MONTH / 60;
+    const DAYS_IN_CURRENT_MONTH = getDaysInCurrentMonth();
+
+    // Стоимость единиц времени
+    const SECOND_RATE = MONTHLY_SALARY / SECONDS_IN_CURRENT_MONTH;
+    const MINUTE_RATE = SECOND_RATE * 60;
+    const HOUR_RATE = MINUTE_RATE * 60;
+    const DAY_RATE = MONTHLY_SALARY / DAYS_IN_CURRENT_MONTH;
+
+    // Длина окружности для круга радиусом 65: 2 * π * 65 ≈ 408.4
+    const CIRCLE_LENGTH = 2 * Math.PI * 65;
+
+    function formatMoney(amount) {
+        return Math.floor(amount).toLocaleString('ru-RU');
+    }
+
+    function formatMoneyDecimal(amount) {
+        return amount.toFixed(2).toLocaleString('ru-RU').replace(',', '.');
+    }
+
+    function formatDate(date) {
+        const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
                         'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
-            const days = ['воскресенье', 'понедельник', 'вторник', 'среда', 
+        const days = ['воскресенье', 'понедельник', 'вторник', 'среда', 
                         'четверг', 'пятница', 'суббота'];
-            
-            return `${days[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
-        }
+        
+        return `${days[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+    }
 
-        function calculateDayEarned() {
-            const now = new Date();
-            const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const secondsPassed = Math.floor((now - startOfDay) / 1000);
-            return secondsPassed * SECOND_RATE;
-        }
+    function calculateDayEarned() {
+        const now = new Date();
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const secondsPassed = Math.floor((now - startOfDay) / 1000);
+        return secondsPassed * SECOND_RATE;
+    }
 
-        function calculateMonthEarned() {
-            const now = new Date();
-            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-            const secondsPassed = Math.floor((now - startOfMonth) / 1000);
-            return secondsPassed * SECOND_RATE;
-        }
+    function calculateMonthEarned() {
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const secondsPassed = Math.floor((now - startOfMonth) / 1000);
+        return secondsPassed * SECOND_RATE;
+    }
 
-        function calculateYearEarned() {
-            const now = new Date();
-            const startOfYear = new Date(now.getFullYear(), 0, 1);
-            const secondsPassed = Math.floor((now - startOfYear) / 1000);
-            return secondsPassed * SECOND_RATE;
+    function calculateYearEarned() {
+        const now = new Date();
+        let totalEarned = 0;
+        
+        // Суммируем за прошлые месяцы
+        for (let month = 0; month < now.getMonth(); month++) {
+            const daysInMonth = new Date(now.getFullYear(), month + 1, 0).getDate();
+            const secondsInMonth = daysInMonth * 24 * 60 * 60;
+            totalEarned += MONTHLY_SALARY; // Полная зарплата за прошлые месяцы
         }
+        
+        // Добавляем текущий месяц
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const secondsPassed = Math.floor((now - startOfMonth) / 1000);
+        totalEarned += secondsPassed * SECOND_RATE;
+        
+        return totalEarned;
+    }
 
-        function calculateDayProgress() {
-            const now = new Date();
-            const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-            const totalDayMs = endOfDay - startOfDay;
-            const passedMs = now - startOfDay;
-            return (passedMs / totalDayMs) * 100;
-        }
+    function calculateDayProgress() {
+        const now = new Date();
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+        const totalDayMs = endOfDay - startOfDay;
+        const passedMs = now - startOfDay;
+        return (passedMs / totalDayMs) * 100;
+    }
 
-        function calculateMonthProgress() {
-            const now = new Date();
-            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-            const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-            const totalMonthMs = endOfMonth - startOfMonth;
-            const passedMs = now - startOfMonth;
-            return (passedMs / totalMonthMs) * 100;
-        }
+    function calculateMonthProgress() {
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        const totalMonthMs = endOfMonth - startOfMonth;
+        const passedMs = now - startOfMonth;
+        return (passedMs / totalMonthMs) * 100;
+    }
 
-        function calculateYearProgress() {
-            const now = new Date();
-            const startOfYear = new Date(now.getFullYear(), 0, 1);
-            const endOfYear = new Date(now.getFullYear() + 1, 0, 1);
-            const totalYearMs = endOfYear - startOfYear;
-            const passedMs = now - startOfYear;
-            return (passedMs / totalYearMs) * 100;
-        }
+    function calculateYearProgress() {
+        const now = new Date();
+        const startOfYear = new Date(now.getFullYear(), 0, 1);
+        const endOfYear = new Date(now.getFullYear() + 1, 0, 1);
+        const totalYearMs = endOfYear - startOfYear;
+        const passedMs = now - startOfYear;
+        return (passedMs / totalYearMs) * 100;
+    }
 
-        function updateDisplay() {
-            const now = new Date();
-            
-            // Расчет заработка за разные периоды
-            const dayEarned = calculateDayEarned();
-            const monthEarned = calculateMonthEarned();
-            const yearEarned = calculateYearEarned();
-            
-            // Прогресс за разные периоды
-            const dayProgress = calculateDayProgress();
-            const monthProgress = calculateMonthProgress();
-            const yearProgress = calculateYearProgress();
-            
-            // Время
-            document.getElementById('currentTime').textContent = now.toLocaleTimeString('ru-RU', { hour12: false });
-            document.getElementById('currentDate').textContent = formatDate(now);
-            
-            // Деньги
-            document.getElementById('todayEarned').textContent = 
-                formatMoney(dayEarned);
-            document.getElementById('monthEarned').textContent = 
-                formatMoney(monthEarned);
-            document.getElementById('yearEarned').textContent = 
-                formatMoney(yearEarned);
-            
-            // Статистика
-            document.getElementById('monthlySalary').textContent = 
-                MONTHLY_SALARY.toLocaleString('ru-RU') + ' ₽';
-            document.getElementById('dayRate').textContent = 
-                formatMoney(MONTHLY_SALARY / 30) + ' ₽';
-            
-            // Круговые диаграммы
-            const dayOffset = CIRCLE_LENGTH - (dayProgress / 100) * CIRCLE_LENGTH;
-            document.getElementById('dayCircle').style.strokeDashoffset = dayOffset;
-            document.getElementById('dayPercent').textContent = Math.round(dayProgress) + '%';
-            
-            const monthOffset = CIRCLE_LENGTH - (monthProgress / 100) * CIRCLE_LENGTH;
-            document.getElementById('monthCircle').style.strokeDashoffset = monthOffset;
-            document.getElementById('monthPercent').textContent = Math.round(monthProgress) + '%';
-            
-            const yearOffset = CIRCLE_LENGTH - (yearProgress / 100) * CIRCLE_LENGTH;
-            document.getElementById('yearCircle').style.strokeDashoffset = yearOffset;
-            document.getElementById('yearPercent').textContent = Math.round(yearProgress) + '%';
-            
-            // Статус
-            document.getElementById('workStatus').textContent = 'время идёт';
-        }
+    function updateRates() {
+        // Обновляем ставки при смене месяца
+        const daysInMonth = getDaysInCurrentMonth();
+        const secondsInMonth = daysInMonth * 24 * 60 * 60;
+        
+        // Обновляем глобальные переменные
+        window.SECOND_RATE = MONTHLY_SALARY / secondsInMonth;
+        window.MINUTE_RATE = window.SECOND_RATE * 60;
+        window.HOUR_RATE = window.MINUTE_RATE * 60;
+        window.DAY_RATE = MONTHLY_SALARY / daysInMonth;
+        
+        return {
+            second: window.SECOND_RATE,
+            minute: window.MINUTE_RATE,
+            hour: window.HOUR_RATE,
+            day: window.DAY_RATE,
+            daysInMonth: daysInMonth
+        };
+    }
 
-        // Обновляем каждую секунду
-        updateDisplay();
-        setInterval(updateDisplay, 1000);
+    function updateDisplay() {
+        const now = new Date();
+        
+        // Обновляем ставки в начале каждого месяца
+        const rates = updateRates();
+        
+        // Расчет заработка за разные периоды
+        const dayEarned = calculateDayEarned();
+        const monthEarned = calculateMonthEarned();
+        const yearEarned = calculateYearEarned();
+        
+        // Прогресс за разные периоды
+        const dayProgress = calculateDayProgress();
+        const monthProgress = calculateMonthProgress();
+        const yearProgress = calculateYearProgress();
+        
+        // Время
+        document.getElementById('currentTime').textContent = 
+            now.toLocaleTimeString('ru-RU', { hour12: false });
+        document.getElementById('currentDate').textContent = formatDate(now);
+        
+        // Деньги
+        document.getElementById('todayEarned').textContent = 
+            formatMoney(dayEarned);
+        document.getElementById('monthEarned').textContent = 
+            formatMoney(monthEarned);
+        document.getElementById('yearEarned').textContent = 
+            formatMoney(yearEarned);
+        
+        // Статистика с подробными ставками
+        document.getElementById('monthlySalary').innerHTML = 
+            MONTHLY_SALARY.toLocaleString('ru-RU') + ' ₽';
+        
+        document.getElementById('dayRate').innerHTML = 
+            formatMoney(rates.day) + ' ₽ ';
+
+        document.getElementById('hourRate').innerHTML = 
+            formatMoneyDecimal(rates.hour) + ' ₽';
+
+        document.getElementById('minRate').innerHTML = 
+            formatMoneyDecimal(rates.minute) + ' ₽';
+
+        document.getElementById('secRate').innerHTML = 
+            formatMoneyDecimal(rates.second) + ' ₽';
+        
+        // Круговые диаграммы
+        const dayOffset = CIRCLE_LENGTH - (dayProgress / 100) * CIRCLE_LENGTH;
+        document.getElementById('dayCircle').style.strokeDashoffset = dayOffset;
+        document.getElementById('dayPercent').textContent = Math.round(dayProgress) + '%';
+        
+        const monthOffset = CIRCLE_LENGTH - (monthProgress / 100) * CIRCLE_LENGTH;
+        document.getElementById('monthCircle').style.strokeDashoffset = monthOffset;
+        document.getElementById('monthPercent').textContent = Math.round(monthProgress) + '%';
+        
+        const yearOffset = CIRCLE_LENGTH - (yearProgress / 100) * CIRCLE_LENGTH;
+        document.getElementById('yearCircle').style.strokeDashoffset = yearOffset;
+        document.getElementById('yearPercent').textContent = Math.round(yearProgress) + '%';
+    }
+
+    // Обновляем каждую секунду
+    updateDisplay();
+    setInterval(updateDisplay, 1000);
     </script>
 </body>
 </html>
