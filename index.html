@@ -364,171 +364,98 @@
 
     <script>
         // Константы
-        const MONTHLY_SALARY = 270000;
-        const WORKING_DAYS_PER_MONTH = 19;
-        const WORK_START = 9;
-        const WORK_END = 18;
-        const WORK_HOURS = WORK_END - WORK_START;
+        const MONTHLY_SALARY = 270000; // 270 000 рублей в месяц
+        const SECONDS_IN_DAY = 24 * 60 * 60; // 24 часа * 60 минут * 60 секунд
+        const SECONDS_IN_MONTH = 30 * SECONDS_IN_DAY; // 30 дней
+        const SECONDS_IN_YEAR = 365 * SECONDS_IN_DAY; // 365 дней
         
-        const DAY_RATE = MONTHLY_SALARY / WORKING_DAYS_PER_MONTH;
-        const WORK_SECONDS_PER_DAY = WORK_HOURS * 3600;
-        const SECOND_RATE = DAY_RATE / WORK_SECONDS_PER_DAY;
+        // Стоимость одной секунды
+        const SECOND_RATE = MONTHLY_SALARY / SECONDS_IN_MONTH;
 
         // Длина окружности для круга радиусом 65: 2 * π * 65 ≈ 408.4
         const CIRCLE_LENGTH = 2 * Math.PI * 65;
 
         function formatMoney(amount) {
-            return Math.round(amount).toLocaleString('ru-RU');
+            return Math.floor(amount).toLocaleString('ru-RU');
         }
 
         function formatDate(date) {
             const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
-                          'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+                        'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
             const days = ['воскресенье', 'понедельник', 'вторник', 'среда', 
-                         'четверг', 'пятница', 'суббота'];
+                        'четверг', 'пятница', 'суббота'];
             
             return `${days[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
         }
 
-        function isWeekend(date) {
-            return date.getDay() === 0 || date.getDay() === 6;
+        function calculateDayEarned() {
+            const now = new Date();
+            const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const secondsPassed = Math.floor((now - startOfDay) / 1000);
+            return secondsPassed * SECOND_RATE;
         }
 
-        function calculateDayEarned(date) {
-            const workStart = new Date(date);
-            workStart.setHours(WORK_START, 0, 0, 0);
-            
-            const workEnd = new Date(date);
-            workEnd.setHours(WORK_END, 0, 0, 0);
-            
-            if (isWeekend(date)) {
-                return 0;
-            } else if (date < workStart) {
-                return 0;
-            } else if (date > workEnd) {
-                return DAY_RATE;
-            } else {
-                const secondsWorked = Math.floor((date - workStart) / 1000);
-                return Math.min(secondsWorked * SECOND_RATE, DAY_RATE);
-            }
+        function calculateMonthEarned() {
+            const now = new Date();
+            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            const secondsPassed = Math.floor((now - startOfMonth) / 1000);
+            return secondsPassed * SECOND_RATE;
+        }
+
+        function calculateYearEarned() {
+            const now = new Date();
+            const startOfYear = new Date(now.getFullYear(), 0, 1);
+            const secondsPassed = Math.floor((now - startOfYear) / 1000);
+            return secondsPassed * SECOND_RATE;
         }
 
         function calculateDayProgress() {
             const now = new Date();
-            
-            if (isWeekend(now)) {
-                return 0;
-            }
-            
-            const workStart = new Date(now);
-            workStart.setHours(WORK_START, 0, 0, 0);
-            
-            const workEnd = new Date(now);
-            workEnd.setHours(WORK_END, 0, 0, 0);
-            
-            if (now < workStart) {
-                return 0;
-            } else if (now > workEnd) {
-                return 100;
-            } else {
-                const secondsWorked = Math.floor((now - workStart) / 1000);
-                return (secondsWorked / WORK_SECONDS_PER_DAY) * 100;
-            }
+            const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+            const totalDayMs = endOfDay - startOfDay;
+            const passedMs = now - startOfDay;
+            return (passedMs / totalDayMs) * 100;
         }
 
         function calculateMonthProgress() {
             const now = new Date();
-            const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-            return (now.getDate() / daysInMonth) * 100;
+            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+            const totalMonthMs = endOfMonth - startOfMonth;
+            const passedMs = now - startOfMonth;
+            return (passedMs / totalMonthMs) * 100;
         }
 
         function calculateYearProgress() {
             const now = new Date();
             const startOfYear = new Date(now.getFullYear(), 0, 1);
-            const endOfYear = new Date(now.getFullYear(), 11, 31);
+            const endOfYear = new Date(now.getFullYear() + 1, 0, 1);
             const totalYearMs = endOfYear - startOfYear;
             const passedMs = now - startOfYear;
             return (passedMs / totalYearMs) * 100;
         }
 
-        function calculateMonthEarned() {
-            const now = new Date();
-            
-            let total = 0;
-            const currentDay = now.getDate();
-            
-            for (let day = 1; day <= currentDay; day++) {
-                const checkDate = new Date(now.getFullYear(), now.getMonth(), day, 23, 59, 59);
-                
-                if (checkDate > now) {
-                    total += calculateDayEarned(now);
-                } else {
-                    if (!isWeekend(checkDate)) {
-                        total += DAY_RATE;
-                    }
-                }
-            }
-            
-            return total;
-        }
-
-        function calculateYearEarned() {
-            const now = new Date();
-            
-            let total = 0;
-            
-            for (let month = 0; month < now.getMonth(); month++) {
-                const daysInMonth = new Date(now.getFullYear(), month + 1, 0).getDate();
-                
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const checkDate = new Date(now.getFullYear(), month, day);
-                    if (!isWeekend(checkDate)) {
-                        total += DAY_RATE;
-                    }
-                }
-            }
-            
-            total += calculateMonthEarned();
-            
-            return total;
-        }
-
-        function calculateToday() {
-            const now = new Date();
-            const workStart = new Date(now);
-            workStart.setHours(WORK_START, 0, 0, 0);
-            
-            if (isWeekend(now)) {
-                return { earned: 0, status: 'выходной' };
-            } else if (now < workStart) {
-                return { earned: 0, status: 'до начала' };
-            } else {
-                const earned = calculateDayEarned(now);
-                return { 
-                    earned: earned,
-                    status: earned >= DAY_RATE ? 'день завершён' : 'рабочий день'
-                };
-            }
-        }
-
         function updateDisplay() {
             const now = new Date();
-            const today = calculateToday();
+            
+            // Расчет заработка за разные периоды
+            const dayEarned = calculateDayEarned();
             const monthEarned = calculateMonthEarned();
             const yearEarned = calculateYearEarned();
             
+            // Прогресс за разные периоды
             const dayProgress = calculateDayProgress();
             const monthProgress = calculateMonthProgress();
             const yearProgress = calculateYearProgress();
             
             // Время
-            document.getElementById('currentTime').textContent = 
-                now.toLocaleTimeString('ru-RU', { hour12: false });
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('ru-RU', { hour12: false });
             document.getElementById('currentDate').textContent = formatDate(now);
             
             // Деньги
             document.getElementById('todayEarned').textContent = 
-                formatMoney(today.earned);
+                formatMoney(dayEarned);
             document.getElementById('monthEarned').textContent = 
                 formatMoney(monthEarned);
             document.getElementById('yearEarned').textContent = 
@@ -538,9 +465,9 @@
             document.getElementById('monthlySalary').textContent = 
                 MONTHLY_SALARY.toLocaleString('ru-RU') + ' ₽';
             document.getElementById('dayRate').textContent = 
-                formatMoney(DAY_RATE) + ' ₽';
+                formatMoney(MONTHLY_SALARY / 30) + ' ₽';
             
-            // Круговые диаграммы (линия по окружности)
+            // Круговые диаграммы
             const dayOffset = CIRCLE_LENGTH - (dayProgress / 100) * CIRCLE_LENGTH;
             document.getElementById('dayCircle').style.strokeDashoffset = dayOffset;
             document.getElementById('dayPercent').textContent = Math.round(dayProgress) + '%';
@@ -554,7 +481,7 @@
             document.getElementById('yearPercent').textContent = Math.round(yearProgress) + '%';
             
             // Статус
-            document.getElementById('workStatus').textContent = today.status;
+            document.getElementById('workStatus').textContent = 'время идёт';
         }
 
         // Обновляем каждую секунду
