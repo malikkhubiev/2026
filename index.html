@@ -626,10 +626,21 @@
             return totalEarned;
         }
 
-        function calculateDayProgress() {
+       function calculateDayProgress() {
             const now = new Date();
-            const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+            const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9); // 9:00
+            const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 18); // 18:00
+            
+            // Если текущее время раньше 9:00
+            if (now < startOfDay) {
+                return 0;
+            }
+            
+            // Если текущее время позже 18:00
+            if (now > endOfDay) {
+                return 100;
+            }
+            
             const totalDayMs = endOfDay - startOfDay;
             const passedMs = now - startOfDay;
             return (passedMs / totalDayMs) * 100;
